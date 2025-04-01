@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+  <body>
+    <header></header>
+    <main>
+      <section class="border border-green-800 rounded bg-gray-100 m-6 p-4">
+        <h2 class="text-2xl font-semibold">Plantillas</h2>
+        <!-- class="bg-red-500 sm:bg-green-500 md:bg-purple-500 lg:bg-pink-500 xl:bg-blue-500" -->
+        <ul
+          id="templates-container"
+          class="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+        ></ul>
+      </section>
+    </main>
+    <footer></footer>
+    <script src="./js/app.js"></script>
+    <script src="./js/models/Template.js"></script>
+    <script src="./js/handlers/template.js"></script>
+  </body>
+</html>
