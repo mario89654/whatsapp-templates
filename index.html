@@ -1,26 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Gestor de Plantillas</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
-  <body>
-    <header></header>
-    <main>
-      <section class="border border-green-800 rounded bg-gray-100 m-6 p-4">
-        <h2 class="text-2xl font-semibold">Plantillas</h2>
-        <!-- class="bg-red-500 sm:bg-green-500 md:bg-purple-500 lg:bg-pink-500 xl:bg-blue-500" -->
-        <ul
-          id="templates-container"
-          class="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
-        ></ul>
-      </section>
+  <body class="bg-gray-100">
+    <header class="bg-green-500 text-white py-4 text-center text-2xl font-bold">
+      Gestor de Plantillas WhatsApp
+    </header>
+    <main class="max-w-4xl mx-auto mt-6 p-4 bg-white shadow rounded-lg">
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Sección Nueva Plantilla -->
+        <section class="border p-4 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Nueva Plantilla</h2>
+          <input type="text" id="title" placeholder="Título" class="w-full p-2 mb-2 border rounded" />
+          <textarea id="message" placeholder="Mensaje" class="w-full p-2 mb-2 border rounded"></textarea>
+          <input type="text" id="hashtag" placeholder="Hashtag" class="w-full p-2 mb-2 border rounded" />
+          <input type="text" id="category" placeholder="Categoría" class="w-full p-2 mb-2 border rounded" />
+          <input type="number" id="priority" placeholder="Prioridad (1-5)" class="w-full p-2 mb-2 border rounded" />
+          <button onclick="addNewTemplate()" class="bg-green-500 text-white px-4 py-2 rounded w-full">Guardar</button>
+          <button onclick="clearForm()" class="bg-gray-400 text-white px-4 py-2 rounded w-full mt-2">Limpiar</button>
+        </section>
+        
+        <!-- Sección Mis Plantillas -->
+        <section>
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Mis Plantillas</h2>
+            <div>
+              <button id="listView" class="bg-blue-500 text-white px-4 py-1 rounded mr-2">Lista</button>
+              <button id="gridView" class="bg-blue-500 text-white px-4 py-1 rounded">Grilla</button>
+            </div>
+          </div>
+          <ul id="templates-container" class="grid gap-4 grid-cols-1 md:grid-cols-2"></ul>
+        </section>
+      </div>
     </main>
-    <footer></footer>
+    <footer class="text-center mt-6 text-gray-600">© 2025 Plantillas</footer>
+    
+    <script>
+      const templates = [];
+
+      // Alternar entre vista de lista y vista de grilla
+      const listViewButton = document.getElementById("listView");
+      const gridViewButton = document.getElementById("gridView");
+      const templatesContainer = document.getElementById("templates-container");
+
+      listViewButton.addEventListener("click", () => {
+        templatesContainer.classList.remove("grid", "grid-cols-1", "md:grid-cols-2");
+        templatesContainer.classList.add("block");
+      });
+
+      gridViewButton.addEventListener("click", () => {
+        templatesContainer.classList.remove("block");
+        templatesContainer.classList.add("grid", "grid-cols-1", "md:grid-cols-2");
+      });
+
+      function addNewTemplate() {
+        const title = document.getElementById("title").value;
+        const message = document.getElementById("message").value;
+        const hashtag = document.getElementById("hashtag").value;
+        const category = document.getElementById("category").value;
+        const priority = document.getElementById("priority").value;
+        
+        if (!title || !message || !hashtag || !category || !priority) {
+          alert("Todos los campos son obligatorios");
+          return;
+        }
+
+        const newTemplate = new Template(title, message, hashtag, category, parseInt(priority));
+        addTemplate(newTemplate);
+        clearForm();
+      }
+
+      function addTemplate(template) {
+        if (templates.some(t => t.title === template.title)) {
+          alert("Esta plantilla ya existe");
+          return;
+        }
+        templates.push(template);
+        renderTemplates();
+      }
+
+      function renderTemplates() {
+        const templatesContainer = document.getElementById("templates-container");
+        if (!templatesContainer) return;
+
+        templatesContainer.innerHTML = ""; // Limpiar el contenedor
+
+        templates.forEach(template => template.render());
+      }
+
+      function clearForm() {
+        document.getElementById("title").value = "";
+        document.getElementById("message").value = "";
+        document.getElementById("hashtag").value = "";
+        document.getElementById("category").value = "";
+        document.getElementById("priority").value = "";
+      }
+    </script>
     <script src="./js/app.js"></script>
     <script src="./js/models/Template.js"></script>
     <script src="./js/handlers/template.js"></script>
+    
   </body>
 </html>
