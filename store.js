@@ -1,4 +1,17 @@
 // store.js
+// function initializeStore() { // ver como agregarlo al proyecto
+//   const template = localStorage.getItem("template");
+//   const newTemplates = template === null ? [] : JSON.parse(template);
+//   const mappedTemplates = newTemplates.map(newTemplate => {
+//     return new Template(
+//       newTemplate.title,
+//       newTemplate.message,
+//       newTemplate.hashtag,
+//       newTemplate.link,
+//       newTemplate.date
+//     );
+//   });
+// }
 function createStore(initialState = []) {
   let state = initialState;
   let listeners = [];
@@ -38,3 +51,5 @@ const templatesStore = createStore([
 ]);
 
 window.templatesStore = templatesStore;
+window.templatesStore.suscribe(saveTemplate); // verificar si el store tiene acceso a la función de guardar
+window.templatesStore.suscribe(renderTemplate); // verificar si el store tiene acceso a la función de guardar
