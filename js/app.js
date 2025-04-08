@@ -49,6 +49,7 @@ function showNotification(message, duration = 3000) {
 
 // Ejecutar cuando se cargue la página
 document.addEventListener("DOMContentLoaded", () => {
+  initializeStore(); 
   // Suscribirse a cambios en el store
   templatesStore.suscribe(() => {
     renderTemplates();
@@ -95,3 +96,4 @@ function renderTemplates() {
     });
   }
 }
+
