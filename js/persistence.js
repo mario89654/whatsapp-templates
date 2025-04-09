@@ -1,59 +1,110 @@
-function saveTemplate() {
-    // tenemos acceso of store?
-    // window templatesStore = getState()
-    localStorage.setItem("template", JSON.stringify(window.templatesStore.getState()));
-}
 // persistence.js
-
-// Guarda las plantillas actuales en localStorage
- 
-
-function saveTemplate() {
-    localStorage.setItem("template", JSON.stringify(window.templatesStore.getState()));
-    console.log("Plantillas guardadas en localStorage");
+function saveTemplates() {
+  localStorage.setItem(
+    "templates",
+    JSON.stringify(window.templatesStore.getState())
+  );
 }
 
-/**
- * Carga las plantillas desde localStorage y las convierte en objetos Template
- * @returns {Array} Array de objetos Template
- */
 function loadTemplates() {
-    const templatesJson = localStorage.getItem("template");
-    
-    if (!templatesJson) {
-        console.log("No hay plantillas guardadas en localStorage");
-        return null;
-    }
-    
-    try {
-        const templates = JSON.parse(templatesJson);
-        const mappedTemplates = templates.map(template => {
-            return new Template(
-                template.title,
-                template.message,
-                template.hashtag,
-                template.category,
-                template.priority
-            );
+  const savedTemplates = localStorage.getItem("templates");
+  
+  // Usando operador ternario para manejar el caso de LocalStorage vacío
+  return savedTemplates ? 
+    (() => {
+      try {
+        // Convierte las plantillas guardadas en objetos Template
+        const templates = JSON.parse(savedTemplates).map(template => {
+          const newTemplate = new Template(
+            template.title,
+            template.message,
+            template.hashtag,
+            template.category,
+            template.priority
+          );
+          
+          // Preservar el ID y la fecha de creación originales
+          newTemplate.id = template.id;
+          newTemplate.createdAt = new Date(template.createdAt);
+          
+          return newTemplate;
         });
         
-        console.log("Plantillas cargadas desde localStorage:", mappedTemplates.length);
-        return mappedTemplates;
-    } catch (error) {
-        console.error("Error al cargar plantillas:", error);
-        return null;
-    }
+        return templates;
+      } catch (error) {
+        console.error("Error al cargar las plantillas:", error);
+        return [];
+      }
+    })() : 
+    []; // Retorna un arreglo vacío si no hay plantillas en localStorage
 }
 
-/**
- * Inicializa el store con plantillas guardadas si existen
- */
 function initializeStore() {
-    const savedTemplates = loadTemplates();
+  const savedTemplates = loadTemplates();
+  
+  // Inicializar el store con las plantillas cargadas o con el estado inicial si no hay plantillas
+  templatesStore.setState(
+    savedTemplates.length > 0 ? 
+    savedTemplates : 
+    [
+      new Template("Bienvenida", "Hola, bienvenido al curso", "#hash1, #hash2", "Curso", 1),
+      new Template("Oferta especial", "Oferta única en abril", "#hash1, #hash2", "Promoción", 2)
+    ]
+  );
+  
+  // Suscribir la función saveTemplates para que se ejecute después de cada cambio
+  templatesStore.suscribe(saveTemplates);
+}
+
+function exportTemplates() {
+  const templates = templatesStore.getState();
+  const dataStr = JSON.stringify(templates, null, 2);
+  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+  
+  const exportFileDefaultName = 'plantillas-export.json';
+  
+  const linkElement = document.createElement('a');
+  linkElement.setAttribute('href', dataUri);
+  linkElement.setAttribute('download', exportFileDefaultName);
+  linkElement.click();
+}
+
+function importTemplates(jsonData) {
+  try {
+    const templates = JSON.parse(jsonData).map(template => {
+      const newTemplate = new Template(
+        template.title,
+        template.message,
+        template.hashtag,
+        template.category,
+        template.priority
+      );
+      
+      // Preservar el ID y la fecha de creación originales si existen
+      if (template.id) newTemplate.id = template.id;
+      if (template.createdAt) newTemplate.createdAt = new Date(template.createdAt);
+      
+      return newTemplate;
+    });
     
-    if (savedTemplates && savedTemplates.length > 0) {
-        // Si hay plantillas guardadas, inicializar el store con ellas
-        window.templatesStore.setState(savedTemplates);
-        console.log("Store inicializado con plantillas guardadas");
-    }
+    // Añadir las plantillas importadas al store
+    let currentTemplates = templatesStore.getState();
+    templatesStore.setState([...currentTemplates, ...templates]);
+    
+    return templates.length;
+  } catch (error) {
+    console.error("Error al importar las plantillas:", error);
+    throw new Error("El archivo no tiene un formato válido");
+  }
+}
+
+function resetTemplates() {
+  // Clear the store
+  templatesStore.setState([]);
+  
+  // Clear localStorage
+  localStorage.removeItem("templates");
+  
+  // Show notification
+  showNotification("Todas las plantillas han sido eliminadas", 3000, 'warning');
 }

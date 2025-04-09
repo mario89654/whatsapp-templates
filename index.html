@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestor de Plantillas</title>
+    <title>Gestor de Plantillas WhatsApp</title>
     <link rel="stylesheet" href="./css/styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
@@ -21,8 +21,11 @@
           <input type="text" id="hashtag" placeholder="Hashtag" class="w-full p-2 mb-2 border rounded" />
           <input type="text" id="category" placeholder="Categoría" class="w-full p-2 mb-2 border rounded" />
           <input type="number" id="priority" placeholder="Prioridad (1-5)" class="w-full p-2 mb-2 border rounded" />
-          <button onclick="addNewTemplate()" class="bg-green-500 text-white px-4 py-2 rounded w-full">Guardar</button>
-          <button onclick="clearForm()" class="bg-gray-400 text-white px-4 py-2 rounded w-full mt-2">Limpiar</button>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="addNewTemplate()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full">Guardar</button>
+            <button onclick="clearForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded w-full">Limpiar</button>
+          </div>
+          <button id="quickTemplateButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full mt-2">Plantilla Rápida</button>
         </section>
         
         <!-- Sección Mis Plantillas -->
@@ -30,81 +33,60 @@
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Mis Plantillas</h2>
             <div>
-              <button id="listView" class="bg-blue-500 text-white px-4 py-1 rounded mr-2">Lista</button>
-              <button id="gridView" class="bg-blue-500 text-white px-4 py-1 rounded">Grilla</button>
+              <button id="listView" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-l">Lista</button>
+              <button id="gridView" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-r">Grilla</button>
             </div>
           </div>
+          
+          <!-- Herramientas de filtrado y búsqueda -->
+          <div class="mb-4 p-3 bg-gray-50 rounded-lg border">
+            <div class="mb-2">
+              <input type="text" id="searchInput" placeholder="Buscar plantillas..." class="w-full p-2 border rounded" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label for="categoryFilter" class="block text-sm font-medium text-gray-700">Categoría</label>
+                <select id="categoryFilter" class="w-full p-2 border rounded">
+                  <option value="Todas">Todas</option>
+                </select>
+              </div>
+              <div>
+                <label for="sortBy" class="block text-sm font-medium text-gray-700">Ordenar por</label>
+                <div class="grid grid-cols-2 gap-1">
+                  <select id="sortBy" class="p-2 border rounded">
+                    <option value="title">Título</option>
+                    <option value="priority">Prioridad</option>
+                    <option value="category">Categoría</option>
+                    <option value="createdAt">Fecha</option>
+                  </select>
+                  <select id="sortOrder" class="p-2 border rounded">
+                    <option value="asc">Ascendente</option>
+                    <option value="desc">Descendente</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-between mt-2">
+              <div class="flex space-x-2">
+                <button id="exportButton" class="bg-indigo-500 hover:bg-indigo-600 text-white px-2 py-1 rounded text-sm">Exportar</button>
+                <button id="resetButton" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm">Eliminar Todo</button>
+              </div>
+              <label for="importInput" class="bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded text-sm cursor-pointer">
+                Importar
+                <input type="file" id="importInput" accept=".json" class="hidden" />
+              </label>
+            </div>
+          </div>
+          
           <ul id="templates-container" class="grid gap-4 grid-cols-1 md:grid-cols-2"></ul>
         </section>
       </div>
     </main>
-    <footer class="text-center mt-6 text-gray-600">© 2025 Plantillas</footer>
+    <footer class="text-center mt-6 text-gray-600 pb-4">© 2025 Plantillas WhatsApp</footer>
     
-    <script>
-      const templates = [];
-
-      // Alternar entre vista de lista y vista de grilla
-      const listViewButton = document.getElementById("listView");
-      const gridViewButton = document.getElementById("gridView");
-      const templatesContainer = document.getElementById("templates-container");
-
-      listViewButton.addEventListener("click", () => {
-        templatesContainer.classList.remove("grid", "grid-cols-1", "md:grid-cols-2");
-        templatesContainer.classList.add("block");
-      });
-
-      gridViewButton.addEventListener("click", () => {
-        templatesContainer.classList.remove("block");
-        templatesContainer.classList.add("grid", "grid-cols-1", "md:grid-cols-2");
-      });
-
-      function addNewTemplate() {
-        const title = document.getElementById("title").value;
-        const message = document.getElementById("message").value;
-        const hashtag = document.getElementById("hashtag").value;
-        const category = document.getElementById("category").value;
-        const priority = document.getElementById("priority").value;
-        
-        if (!title || !message || !hashtag || !category || !priority) {
-          alert("Todos los campos son obligatorios");
-          return;
-        }
-
-        const newTemplate = new Template(title, message, hashtag, category, parseInt(priority));
-        addTemplate(newTemplate);
-        clearForm();
-      }
-
-      function addTemplate(template) {
-        if (templates.some(t => t.title === template.title)) {
-          alert("Esta plantilla ya existe");
-          return;
-        }
-        templates.push(template);
-        renderTemplates();
-      }
-
-      function renderTemplates() {
-        const templatesContainer = document.getElementById("templates-container");
-        if (!templatesContainer) return;
-
-        templatesContainer.innerHTML = ""; // Limpiar el contenedor
-
-        templates.forEach(template => template.render());
-      }
-
-      function clearForm() {
-        document.getElementById("title").value = "";
-        document.getElementById("message").value = "";
-        document.getElementById("hashtag").value = "";
-        document.getElementById("category").value = "";
-        document.getElementById("priority").value = "";
-      }
-    </script>
     <script src="./js/models/Template.js"></script>
     <script src="store.js"></script>
     <script src="./js/persistence.js"></script>
     <script src="./js/app.js"></script>
-    
   </body>
 </html>
