@@ -1,3 +1,4 @@
+// store.js
 function createStore(initialState = []) {
   let state = initialState;
   let listeners = [];
@@ -13,10 +14,14 @@ function createStore(initialState = []) {
 
   function addTemplate(newTemplate) {
     setState([...state, newTemplate]);
+    // No es necesario llamar a saveTemplates() explícitamente aquí
+    // ya que la suscripción se encargará de ello cuando se llame a setState
   }
 
   function removeTemplate(id) {
     setState(state.filter(template => template.id !== id));
+    // No es necesario llamar a saveTemplates() explícitamente aquí
+    // ya que la suscripción se encargará de ello cuando se llame a setState
   }
 
   function editTemplate(updatedTemplate) {
@@ -31,6 +36,8 @@ function createStore(initialState = []) {
       ), {id: updatedTemplate.id, createdAt: updatedTemplate.createdAt}) : 
       template
     ));
+    // No es necesario llamar a saveTemplates() explícitamente aquí
+    // ya que la suscripción se encargará de ello cuando se llame a setState
   }
 
   function searchTemplates(query) {
@@ -77,6 +84,8 @@ function createStore(initialState = []) {
 
   function suscribe(listener) {
     listeners.push(listener);
+    // Ejecutamos el listener inmediatamente para asegurar el estado inicial
+    listener(state);
     return () => {
       const index = listeners.indexOf(listener);
       if (index > -1) listeners.splice(index, 1);
@@ -97,11 +106,10 @@ function createStore(initialState = []) {
   };
 }
 
-// 🔹 Aquí aseguramos que el estado inicial tenga 2 plantillas precargadas
+//  Aquí aseguramos que el estado inicial tenga 2 plantillas precargadas
 const templatesStore = createStore([
   new Template("Bienvenida", "Hola, bienvenido al curso", "#hash1, #hash2", "Curso", 1),
   new Template("Oferta especial", "Oferta única en abril", "#hash1, #hash2", "Promoción", 2)
 ]);
 
 window.templatesStore = templatesStore;
-window.templatesStore.suscribe(saveTemplates); // Corregido de saveTemplate a saveTemplates

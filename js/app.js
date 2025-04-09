@@ -1,3 +1,4 @@
+// app.js
 function addNewTemplate() {
   const title = document.getElementById("title").value;
   const message = document.getElementById("message").value;
@@ -19,7 +20,6 @@ function addNewTemplate() {
 function clearForm() {
   document.getElementById("title").value = "";
   document.getElementById("message").value = "";
-  document.getElementById("hashtag").value = "";
   document.getElementById("hashtag").value = "";
   document.getElementById("category").value = "";
   document.getElementById("priority").value = "";
@@ -221,6 +221,17 @@ function openQuickTemplateForm() {
 
 // Ejecutar cuando se cargue la página
 document.addEventListener("DOMContentLoaded", () => {
+  // Configurar evento para resetear todas las plantillas
+const resetButton = document.getElementById("resetButton");
+if (resetButton) {
+  resetButton.addEventListener("click", () => {
+    // Mostrar confirmación antes de eliminar
+    if (confirm("¿Estás seguro que deseas eliminar todas las plantillas? Esta acción no se puede deshacer.")) {
+      resetTemplates();
+    }
+  });
+}
+  // Inicializar el store con datos del localStorage
   initializeStore();
   
   // Suscribirse a cambios en el store
@@ -234,15 +245,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const gridViewButton = document.getElementById("gridView");
   const templatesContainer = document.getElementById("templates-container");
   
-  listViewButton.addEventListener("click", () => {
-    templatesContainer.classList.remove("grid", "grid-cols-1", "md:grid-cols-2");
-    templatesContainer.classList.add("block");
-  });
-  
-  gridViewButton.addEventListener("click", () => {
-    templatesContainer.classList.remove("block");
-    templatesContainer.classList.add("grid", "grid-cols-1", "md:grid-cols-2");
-  });
+  if (listViewButton && gridViewButton && templatesContainer) {
+    listViewButton.addEventListener("click", () => {
+      templatesContainer.classList.remove("grid", "grid-cols-1", "md:grid-cols-2");
+      templatesContainer.classList.add("block");
+    });
+    
+    gridViewButton.addEventListener("click", () => {
+      templatesContainer.classList.remove("block");
+      templatesContainer.classList.add("grid", "grid-cols-1", "md:grid-cols-2");
+    });
+  }
   
   // Configurar eventos para búsqueda y filtrado
   const searchInput = document.getElementById("searchInput");

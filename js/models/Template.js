@@ -1,3 +1,4 @@
+// Template.js
 class Template {
   constructor(title, message, hashtag, category, priority) {
     this.id = Date.now() + Math.random().toString(36).substr(2, 9); // ID único
