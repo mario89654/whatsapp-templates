@@ -92,6 +92,40 @@ function createStore(initialState = []) {
     };
   }
 
+  function getLastDeletedTemplate() {
+    return window.templateTrashBin?.lastDeleted || null;
+  }
+
+  function recoverLastDeletedTemplate() {
+    const lastDeleted = getLastDeletedTemplate();
+    
+    if (lastDeleted) {
+      // Recrear la plantilla con todos sus atributos originales
+      const recoveredTemplate = new Template(
+        lastDeleted.title,
+        lastDeleted.message,
+        lastDeleted.hashtag,
+        lastDeleted.category,
+        lastDeleted.priority
+      );
+      
+      // Restaurar ID y fecha de creación originales
+      recoveredTemplate.id = lastDeleted.id;
+      recoveredTemplate.createdAt = new Date(lastDeleted.createdAt);
+      
+      // Añadir al store
+      addTemplate(recoveredTemplate);
+      
+      // Limpiar la referencia para evitar recuperaciones múltiples
+      window.templateTrashBin.lastDeleted = null;
+      localStorage.removeItem("lastDeletedTemplate");
+      
+      return true;
+    }
+    
+    return false;
+  }
+
   return { 
     getState, 
     setState, 
@@ -102,7 +136,9 @@ function createStore(initialState = []) {
     filterByCategory,
     sortTemplates,
     getAllCategories,
-    suscribe 
+    suscribe,
+    getLastDeletedTemplate,
+    recoverLastDeletedTemplate
   };
 }
 

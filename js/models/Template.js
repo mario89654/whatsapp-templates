@@ -49,8 +49,31 @@ class Template {
     // Añadir event listener al botón de eliminar
     const deleteBtn = div.querySelector('.delete-btn');
     deleteBtn.addEventListener('click', () => {
-      templatesStore.removeTemplate(this.id);
-      showNotification("Plantilla eliminada con éxito");
+      // Ventana de confirmación antes de eliminar
+      if (confirm("¿Estás seguro que deseas eliminar esta plantilla?")) {
+        // Guardar plantilla para posible recuperación antes de eliminarla
+        const deletedTemplate = templatesStore.getState().find(t => t.id === this.id);
+        
+        // Si existe el objeto para almacenar la última plantilla eliminada, guardarlo
+        if (window.templateTrashBin === undefined) {
+          window.templateTrashBin = {};
+        }
+        
+        // Guardar la plantilla eliminada
+        window.templateTrashBin.lastDeleted = deletedTemplate;
+        
+        // Eliminar la plantilla
+        templatesStore.removeTemplate(this.id);
+        
+        // Actualizar localStorage con la última plantilla eliminada
+        localStorage.setItem("lastDeletedTemplate", JSON.stringify(deletedTemplate));
+        
+        // Mostrar notificación
+        showNotification("Plantilla eliminada con éxito");
+        
+        // Actualizar el indicador de estado de recuperación
+        updateRecoveryStatus();
+      }
     });
 
     // Añadir event listener al botón de editar
