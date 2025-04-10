@@ -221,6 +221,18 @@ function openQuickTemplateForm() {
 
 // Ejecutar cuando se cargue la página
 document.addEventListener("DOMContentLoaded", () => {
+  // Cargar la última plantilla eliminada si existe
+const lastDeletedTemplate = localStorage.getItem("lastDeletedTemplate");
+if (lastDeletedTemplate) {
+  if (window.templateTrashBin === undefined) {
+    window.templateTrashBin = {};
+  }
+  window.templateTrashBin.lastDeleted = JSON.parse(lastDeletedTemplate);
+}
+
+// Inicializar los indicadores
+updateStorageStatus();
+updateRecoveryStatus();
   // Configurar evento para resetear todas las plantillas
 const resetButton = document.getElementById("resetButton");
 if (resetButton) {
@@ -320,5 +332,53 @@ function renderTemplates() {
       const templateElement = template.render();
       templatesContainer.appendChild(templateElement);
     });
+  }
+}
+
+// Función para mostrar el estado de almacenamiento
+function updateStorageStatus() {
+  const statusContainer = document.getElementById("storage-status");
+  if (!statusContainer) return;
+  
+  const templates = templatesStore.getState();
+  const lastSaveTime = new Date().toLocaleTimeString();
+  
+  statusContainer.innerHTML = `
+    <div class="flex items-center">
+      <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+      <span class="text-sm">${templates.length} plantillas guardadas</span>
+      <span class="text-xs text-gray-500 ml-2">Último guardado: ${lastSaveTime}</span>
+    </div>
+  `;
+}
+// Función para mostrar el botón de recuperación cuando hay una plantilla eliminada
+function updateRecoveryStatus() {
+  const recoveryContainer = document.getElementById("recovery-button-container");
+  if (!recoveryContainer) return;
+  
+  const lastDeleted = templatesStore.getLastDeletedTemplate();
+  
+  if (lastDeleted) {
+    recoveryContainer.innerHTML = `
+      <button id="recover-button" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1 px-3 rounded text-sm flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="mr-1">
+          <path d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/>
+          <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/>
+        </svg>
+        Recuperar última plantilla
+      </button>
+    `;
+    
+    // Añadir event listener al botón de recuperación
+    document.getElementById("recover-button").addEventListener("click", () => {
+      if (templatesStore.recoverLastDeletedTemplate()) {
+        showNotification("Plantilla recuperada con éxito");
+        updateRecoveryStatus();
+      } else {
+        showNotification("No hay plantilla para recuperar", 3000, 'warning');
+      }
+    });
+  } else {
+    recoveryContainer.innerHTML = '';
   }
 }

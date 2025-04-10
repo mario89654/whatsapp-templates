@@ -37,7 +37,20 @@
               <button id="gridView" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-r">Grilla</button>
             </div>
           </div>
-          
+
+          <!-- Indicador de almacenamiento y recuperación -->
+          <div class="flex justify-between items-center mb-4 px-4"> 
+            <!-- Indicador de estado de almacenamiento -->
+            <div id="storage-status" class="text-sm text-gray-600">
+              <!-- Se llenará dinámicamente con JavaScript -->
+            </div>
+            
+            <!-- Contenedor para el botón de recuperación -->
+            <div id="recovery-button-container">
+              <!-- Se llenará dinámicamente cuando haya una plantilla eliminada -->
+            </div>
+          </div>
+
           <!-- Herramientas de filtrado y búsqueda -->
           <div class="mb-4 p-3 bg-gray-50 rounded-lg border">
             <div class="mb-2">
@@ -72,18 +85,18 @@
                 <button id="resetButton" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm">Eliminar Todo</button>
               </div>
               <label for="importInput" class="bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded text-sm cursor-pointer">
-                Importar
+                Importar 
                 <input type="file" id="importInput" accept=".json" class="hidden" />
               </label>
             </div>
           </div>
-          
+
           <ul id="templates-container" class="grid gap-4 grid-cols-1 md:grid-cols-2"></ul>
         </section>
       </div>
     </main>
-    <footer class="text-center mt-6 text-gray-600 pb-4">© 2025 Plantillas WhatsApp</footer>
-    
+    <footer class="text-center mt-6 text-gray-600 pb-4">© 2025 Plantillas Whpy</footer>
+
     <script src="./js/models/Template.js"></script>
     <script src="store.js"></script>
     <script src="./js/persistence.js"></script>
