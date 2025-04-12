@@ -218,7 +218,86 @@ function openQuickTemplateForm() {
     document.body.removeChild(modal);
   });
 }
+// Función para exportar plantillas
+function exportTemplates() {
+  const templates = templatesStore.getState();
+  
+  if (templates.length === 0) {
+    showNotification("No hay plantillas para exportar", 3000, 'warning');
+    return;
+  }
+  
+  const dataStr = JSON.stringify(templates, null, 2);
+  const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+  
+  const exportFileName = `plantillas_export_${new Date().toISOString().slice(0, 10)}.json`;
+  
+  const linkElement = document.createElement("a");
+  linkElement.setAttribute("href", dataUri);
+  linkElement.setAttribute("download", exportFileName);
+  linkElement.click();
+  
+  showNotification(`${templates.length} plantillas exportadas con éxito`);
+}
 
+// Función para importar plantillas
+function importTemplates(jsonData) {
+  try {
+    const templates = JSON.parse(jsonData);
+    
+    if (!Array.isArray(templates)) {
+      throw new Error("El formato de importación no es válido");
+    }
+    
+    let importCount = 0;
+    
+    templates.forEach(template => {
+      try {
+        const newTemplate = new Template(
+          template.title || "Sin título",
+          template.message || "",
+          template.hashtag || "#importado",
+          template.category || "Importado",
+          template.priority || 3
+        );
+        
+        // Preservar ID y fecha si están disponibles
+        if (template.id) newTemplate.id = template.id;
+        if (template.createdAt) newTemplate.createdAt = new Date(template.createdAt);
+        
+        templatesStore.addTemplate(newTemplate);
+        importCount++;
+      } catch (error) {
+        console.error("Error al importar plantilla:", error);
+      }
+    });
+    
+    return importCount;
+  } catch (error) {
+    throw new Error("Error al importar: El archivo no es un JSON válido");
+  }
+}
+
+// Función para resetear todas las plantillas
+function resetTemplates() {
+  // Guardar una copia para posible recuperación
+  const deletedTemplates = templatesStore.getState();
+  
+  // Limpiar el estado
+  templatesStore.setState([]);
+  
+  // Limpiar localStorage
+  localStorage.removeItem("templates");
+  localStorage.removeItem("lastDeletedTemplate");
+  
+  // Limpiar el contenedor de recuperación
+  if (window.templateTrashBin) {
+    window.templateTrashBin = {};
+  }
+  
+  showNotification("Todas las plantillas han sido eliminadas");
+  updateRecoveryStatus();
+}
 // Ejecutar cuando se cargue la página
 document.addEventListener("DOMContentLoaded", () => {
   // Cargar la última plantilla eliminada si existe
@@ -382,3 +461,4 @@ function updateRecoveryStatus() {
     recoveryContainer.innerHTML = '';
   }
 }
+

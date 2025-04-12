@@ -14,14 +14,10 @@ function createStore(initialState = []) {
 
   function addTemplate(newTemplate) {
     setState([...state, newTemplate]);
-    // No es necesario llamar a saveTemplates() explícitamente aquí
-    // ya que la suscripción se encargará de ello cuando se llame a setState
   }
 
   function removeTemplate(id) {
     setState(state.filter(template => template.id !== id));
-    // No es necesario llamar a saveTemplates() explícitamente aquí
-    // ya que la suscripción se encargará de ello cuando se llame a setState
   }
 
   function editTemplate(updatedTemplate) {
@@ -36,8 +32,28 @@ function createStore(initialState = []) {
       ), {id: updatedTemplate.id, createdAt: updatedTemplate.createdAt}) : 
       template
     ));
-    // No es necesario llamar a saveTemplates() explícitamente aquí
-    // ya que la suscripción se encargará de ello cuando se llame a setState
+  }
+
+  function duplicateTemplate(id) {
+    const original = state.find(template => template.id === id);
+    if (!original) return;
+
+    let copyTitle = original.title;
+    let copyIndex = 1;
+    while (state.some(t => t.title === copyTitle)) {
+      copyTitle = `${original.title} (Copia ${copyIndex})`;
+      copyIndex++;
+    }
+
+    const duplicated = new Template(
+      copyTitle,
+      original.message,
+      original.hashtag,
+      original.category,
+      original.priority
+    );
+
+    addTemplate(duplicated);
   }
 
   function searchTemplates(query) {
@@ -84,7 +100,6 @@ function createStore(initialState = []) {
 
   function suscribe(listener) {
     listeners.push(listener);
-    // Ejecutamos el listener inmediatamente para asegurar el estado inicial
     listener(state);
     return () => {
       const index = listeners.indexOf(listener);
@@ -100,7 +115,6 @@ function createStore(initialState = []) {
     const lastDeleted = getLastDeletedTemplate();
     
     if (lastDeleted) {
-      // Recrear la plantilla con todos sus atributos originales
       const recoveredTemplate = new Template(
         lastDeleted.title,
         lastDeleted.message,
@@ -109,14 +123,11 @@ function createStore(initialState = []) {
         lastDeleted.priority
       );
       
-      // Restaurar ID y fecha de creación originales
       recoveredTemplate.id = lastDeleted.id;
       recoveredTemplate.createdAt = new Date(lastDeleted.createdAt);
       
-      // Añadir al store
       addTemplate(recoveredTemplate);
       
-      // Limpiar la referencia para evitar recuperaciones múltiples
       window.templateTrashBin.lastDeleted = null;
       localStorage.removeItem("lastDeletedTemplate");
       
@@ -138,11 +149,11 @@ function createStore(initialState = []) {
     getAllCategories,
     suscribe,
     getLastDeletedTemplate,
-    recoverLastDeletedTemplate
+    recoverLastDeletedTemplate,
+    duplicateTemplate // Agregado aquí
   };
 }
 
-//  Aquí aseguramos que el estado inicial tenga 2 plantillas precargadas
 const templatesStore = createStore([
   new Template("Bienvenida", "Hola, bienvenido al curso", "#hash1, #hash2", "Curso", 1),
   new Template("Oferta especial", "Oferta única en abril", "#hash1, #hash2", "Promoción", 2)
